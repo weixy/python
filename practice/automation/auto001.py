@@ -15,10 +15,15 @@ def setup():
     proxy.selenium_proxy()
     if settings.WEB_DRIVER == 'firefox':
         from selenium.webdriver.firefox.webdriver import WebDriver
+        selenium = WebDriver(proxy=proxy)
     elif settings.WEB_DRIVER == 'chrome':
         from selenium.webdriver.chrome.webdriver import WebDriver
+        from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
-    selenium = WebDriver(proxy=proxy)
+        capabilities = DesiredCapabilities.CHROME
+        proxy.add_to_capabilities(capabilities)
+        selenium = WebDriver()
+
     logging.info('Automation configuration has been completed.')
     return selenium, proxy, server
 
