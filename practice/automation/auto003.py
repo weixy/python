@@ -27,4 +27,12 @@ class FeatureBroker:
 
 features = FeatureBroker()
 
-http://code.activestate.com/recipes/413268/
+def noassertion(obj): return True
+
+
+class RequiredFeature(object):
+    def __init__(self, feature, assertion=noassertion()):
+        self.feature = feature
+        self.assertion = assertion
+    def __get__(self, instance, owner):
+        return self
