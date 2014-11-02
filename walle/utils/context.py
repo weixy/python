@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import sys
 import logging
 
 import robot_settings as settings
@@ -31,7 +32,7 @@ def config_logging():
                         datefmt='%m-%d %H:%M',
                         filename='test_result.log',
                         filemode='w')
-    console = logging.StreamHandler()
+    console = logging.StreamHandler(sys.stdout)
     console.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
     console.setFormatter(formatter)
