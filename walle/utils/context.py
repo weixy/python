@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# use pytest as automation framework
+
 import sys
 import logging
 
@@ -23,7 +25,9 @@ def get_driver():
     elif settings.WEB_DRIVER == 'chrome':
         from selenium.webdriver.chrome.webdriver import WebDriver
         return WebDriver()
-    return None
+    elif settings.WEB_DRIVER == 'phantomjs':
+        from selenium.webdriver.phantomjs.webdriver import WebDriver
+        return WebDriver()
 
 
 def config_logging():
