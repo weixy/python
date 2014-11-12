@@ -1,8 +1,11 @@
 __author__ = 'y981821'
 
 import logging
+import json
+
 from browsermobproxy import Server
 import config.config_settings as settings
+import json
 
 auto_globals = {'proxy': None, 'selenium': None, 'server': None}
 
@@ -32,7 +35,7 @@ def execute(selenium, proxy, server):
     proxy.new_har("YELLOW")
     selenium.get(settings.SERVER_URL_TO_TEST)
     har = proxy.har
-    harFile.write('%s' % har)
+    harFile.write(json.dumps(har))
     harFile.close()
     server.stop()
     selenium.quit()
@@ -40,6 +43,6 @@ def execute(selenium, proxy, server):
 
 if __name__ == '__main__':
     har_file = 'results/yol.har'
-    harFile = open(har_file, 'w')
+    harFile = open(har_file.encode('utf8'), 'w')
     auto_globals['selenium'], auto_globals['proxy'], auto_globals['server'] = setup()
     execute(auto_globals['selenium'], auto_globals['proxy'], auto_globals['server'])
