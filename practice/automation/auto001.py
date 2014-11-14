@@ -6,6 +6,7 @@ import json
 from browsermobproxy import Server
 import config.config_settings as settings
 import json
+import time
 
 auto_globals = {'proxy': None, 'selenium': None, 'server': None}
 
@@ -34,6 +35,14 @@ def setup():
 def execute(selenium, proxy, server):
     proxy.new_har("YELLOW")
     selenium.get(settings.SERVER_URL_TO_TEST)
+
+    input_username = selenium.find_element_by_xpath(".//input[@name='username']")
+    input_username.send_keys('developers@finda.co.nz')
+    input_password = selenium.find_element_by_xpath(".//input[@name='password']")
+    input_password.send_keys('QAWSEDRFTG')
+    submit_button = selenium.find_element_by_xpath(".//input[@value='Submit']")
+    submit_button.click()
+    time.sleep(20)
     har = proxy.har
     harFile.write(json.dumps(har))
     harFile.close()
