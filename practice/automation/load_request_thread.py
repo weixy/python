@@ -46,7 +46,7 @@ def do_work(index, url):
 
         start = millis_now()
         response = client.get(redirect_url, allow_redirects=False)
-        diff = millis_now() -start
+        diff = millis_now() - start
         print '%s ... ... %s' % (diff, response.status_code)
 
         busi_url = '%s%s' % (url, '/business/6401/')
@@ -60,4 +60,3 @@ def do_work(index, url):
 
     except Exception as e:
         print 'Failed with exception \'%s\': \n%s' % (e.__class__, e.message)
-
