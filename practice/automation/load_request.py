@@ -3,7 +3,7 @@ __author__ = 'y981821'
 import time
 import requests
 
-URL = 'https://staging.sem.yellow.co.nz'
+URL = 'https://sem.yellow.co.nz'
 client = requests.session()
 millis_now = lambda: int(round(time.time() * 1000))
 
@@ -19,13 +19,13 @@ login_url = '%s%s' % (URL, '/login/login?next=%2F')
 start = millis_now()
 response = client.post(login_url, data=login_data, headers=dict(Referer=refer_url), allow_redirects=False)
 diff = millis_now() - start
-print '%s ... ... %s' % (diff, response.status_code)
+print '%s ... ... %s' % (response.elapsed.total_seconds() * 1000, response.status_code)
 redirect_url = response.headers['Location']
 
 start = millis_now()
 response = client.get(redirect_url, allow_redirects=False)
 diff = millis_now() -start
-print '%s ... ... %s' % (diff, response.status_code)
+print '%s ... ... %s' % (response.elapsed.total_seconds() * 1000, response.status_code)
 
 busi_url = '%s%s' % (URL, '/business/6401/')
 start = millis_now()
