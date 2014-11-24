@@ -60,3 +60,32 @@ def do_work(index, url):
 
     except Exception as e:
         print 'Failed with exception \'%s\': \n%s' % (e.__class__, e.message)
+
+
+def working():
+    t = threading.currentThread()
+    print '[' + t.name + '] Sub Thread Begin'
+
+    i = 0
+    while i < WORKER_CYCLE:
+        i += 1
+        do_work(i, TARGET_URL['staging'])
+        sleep(LOOP_SLEEP)
+
+    print '[' + t.name + '] Sub Thread End'
+
+
+def main():
+    start = millis_now()
+
+    Threads = []
+
+    for i in range(THREAD_NUM):
+        t = threading.Thread(target=working, name='T' + str(i))
+        t.setDaemon(True)
+        Threads.append(t)
+
+
+
+if __name__ == '__main__':
+    main()
