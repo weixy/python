@@ -1,7 +1,7 @@
 __author__ = 'y981821'
 
 import httplib
-import urllib
+import re
 import time
 
 URL = 'staging.sem.yellow.co.nz'
@@ -22,4 +22,6 @@ print '%f ms' % (transfer_time - request_time)
 print '%f ms' % (transfer_time - start_time)
 print resp.status
 print resp.msg
+print re.search('csrftoken=(.+?);', resp.getheader('set-cookie')).group(1)
 print resp.getheader('location')
+
