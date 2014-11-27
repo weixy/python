@@ -13,7 +13,7 @@ TARGET_URL = {
 }
 
 # Configuration
-THREAD_NUM = 10
+THREAD_NUM = 4
 WORKER_CYCLE = 3
 LOOP_SLEEP = 0
 
@@ -136,19 +136,19 @@ def main():
     print 'main thread end'
 
     t2 = millis_now()
-    print '=========================================='
+    print '============================================================='
     print 'Execution Number: ', THREAD_NUM, '*', WORKER_CYCLE, '=', THREAD_NUM * WORKER_CYCLE
     print 'Total Time (ms): ', t2 - t1
     #print 'Average Time per Request (ms): ', (t2 - t1) / (WORKER_CYCLE)
-    print 'Requests per Second: ', 1 / ((t2 - t1) / (THREAD_NUM * WORKER_CYCLE) * 1000)
+    print 'Requests per Second: %.1f' % (1.0 / ((t2 - t1) / (THREAD_NUM * WORKER_CYCLE) * 1000))
     #print 'Error Number: ', ERROR_NUM
-    print '------------------------------------------'
-    print 'REQ\t\t\tACT\tNUM\tDUR'
-    print '%s\t\t\t%s\t%i\t%.1f' % (LOAD_RESULTS[1]['info'][0], LOAD_RESULTS[1]['info'][1], LOAD_RESULTS[1]['total_num'], LOAD_RESULTS[1]['ave_resp'])
-    print '%s\t\t\t%s\t%i\t%.1f' % (LOAD_RESULTS[2]['info'][0], LOAD_RESULTS[2]['info'][1], LOAD_RESULTS[2]['total_num'], LOAD_RESULTS[2]['ave_resp'])
-    print '%s\t\t\t%s\t%i\t%.1f' % (LOAD_RESULTS[3]['info'][0], LOAD_RESULTS[3]['info'][1], LOAD_RESULTS[3]['total_num'], LOAD_RESULTS[3]['ave_resp'])
-    print '%s\t\t\t%s\t%i\t%.1f' % (LOAD_RESULTS[4]['info'][0], LOAD_RESULTS[4]['info'][1], LOAD_RESULTS[4]['total_num'], LOAD_RESULTS[4]['ave_resp'])
-    print '%s\t\t\t%s\t%i\t%.1f' % (LOAD_RESULTS[5]['info'][0], LOAD_RESULTS[5]['info'][1], LOAD_RESULTS[5]['total_num'], LOAD_RESULTS[5]['ave_resp'])
+    print '------------------------------------------------------------'
+    print 'REQUEST\t\t\tACT_TYPE\tREQ_NUM\t\tAVG_RESP\tMAX_RESP\tMIN_RESP'
+    print '%-23s %s\t\t%i\t\t%.1f\t\t%.1f\t\t%.1f' % (LOAD_RESULTS[1]['info'][0], LOAD_RESULTS[1]['info'][1], LOAD_RESULTS[1]['total_num'], LOAD_RESULTS[1]['ave_resp'], max(LOAD_RESULTS[1]['durations']), min(LOAD_RESULTS[1]['durations']))
+    print '%-23s %s\t\t%i\t\t%.1f\t\t%.1f\t\t%.1f' % (LOAD_RESULTS[2]['info'][0], LOAD_RESULTS[2]['info'][1], LOAD_RESULTS[2]['total_num'], LOAD_RESULTS[2]['ave_resp'], max(LOAD_RESULTS[2]['durations']), min(LOAD_RESULTS[2]['durations']))
+    print '%-23s %s\t\t%i\t\t%.1f\t\t%.1f\t\t%.1f' % (LOAD_RESULTS[3]['info'][0], LOAD_RESULTS[3]['info'][1], LOAD_RESULTS[3]['total_num'], LOAD_RESULTS[3]['ave_resp'], max(LOAD_RESULTS[3]['durations']), min(LOAD_RESULTS[3]['durations']))
+    print '%-23s %s\t\t%i\t\t%.1f\t\t%.1f\t\t%.1f' % (LOAD_RESULTS[4]['info'][0], LOAD_RESULTS[4]['info'][1], LOAD_RESULTS[4]['total_num'], LOAD_RESULTS[4]['ave_resp'], max(LOAD_RESULTS[4]['durations']), min(LOAD_RESULTS[4]['durations']))
+    print '%-23s %s\t\t%i\t\t%.1f\t\t%.1f\t\t%.1f' % (LOAD_RESULTS[5]['info'][0], LOAD_RESULTS[5]['info'][1], LOAD_RESULTS[5]['total_num'], LOAD_RESULTS[5]['ave_resp'], max(LOAD_RESULTS[5]['durations']), min(LOAD_RESULTS[5]['durations']))
 
 if __name__ == '__main__':
     main()
