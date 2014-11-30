@@ -1,8 +1,9 @@
 __author__ = 'y981821'
 
-import time
+import csv
 import requests
 import threading
+import time
 from time import sleep
 
 # Targets
@@ -12,8 +13,8 @@ TARGET_URL = {
 }
 
 # Configuration
-THREAD_NUM = 4
-WORKER_CYCLE = 3
+THREAD_NUM = 80
+WORKER_CYCLE = 1
 LOOP_SLEEP = 0
 
 # Statistics
@@ -124,6 +125,7 @@ def working():
     while i < WORKER_CYCLE:
         i += 1
         do_work(i, TARGET_URL['staging'])
+        # do_work(i, TARGET_URL['production'])
         sleep(LOOP_SLEEP)
 
     print '[' + t.name + '] Sub Thread End'
@@ -160,7 +162,31 @@ def main():
     print '%-23s %s\t\t%.1f\t\t%.1f\t\t%.1f' % (LOAD_STATISTICS[4]['info'][0], LOAD_STATISTICS[4]['info'][1], LOAD_STATISTICS[4]['ave_resp'], LOAD_STATISTICS[4]['min_resp'], LOAD_STATISTICS[4]['max_resp'])
     print '%-23s %s\t\t%.1f\t\t%.1f\t\t%.1f' % (LOAD_STATISTICS[5]['info'][0], LOAD_STATISTICS[5]['info'][1], LOAD_STATISTICS[5]['ave_resp'], LOAD_STATISTICS[5]['min_resp'], LOAD_STATISTICS[5]['max_resp'])
     print '------------------------------------------------------------'
-    print LOAD_RECORDS
+    # print LOAD_RECORDS
+    ave_resp_ps = [(0, 0.000, 0, 0, 0)]
+    td = (t2 - t1) / 1000
+    for t in range(1, td + 1):
+        t_sum = []
+        finished_num = 0
+        working_num = 0
+        record_list = LOAD_RECORDS[3]
+        ts = t1 + t * 1000
+        for v in record_list:
+            if v[1] <= ts:
+                finished_num += 1
+                t_sum.append(v[1] - v[0])
+            if v[0] <= ts <= v[1]:
+                working_num += 1
+        if finished_num > 0:
+            ave_resp_ps.append((t, float('%.3f' % (float(sum(t_sum))/(finished_num*1000))), min(t_sum)/1000, max(t_sum)/1000, working_num))
+        else:
+            pre_ave_resp = ave_resp_ps[-1][1]
+            ave_resp_ps.append((t, pre_ave_resp, 0, 0, working_num))
+    # print ave_resp_ps
+    with open('ave_resp_persec.csv', 'wb') as f:
+        writer = csv.writer(f)
+        writer.writerows(ave_resp_ps)
+
 
 if __name__ == '__main__':
     main()
