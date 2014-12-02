@@ -13,9 +13,10 @@ TARGET_URL = {
 }
 
 # Configuration
-THREAD_NUM = 80
-WORKER_CYCLE = 1
-LOOP_SLEEP = 0
+THREAD_NUM = 20
+THREAD_BATCH = 3
+THREAD_REPEAT = 2
+LOOP_SLEEP = 20
 
 # Statistics
 ERROR_NUM = 0
@@ -25,6 +26,7 @@ LOAD_STATISTICS = {
     3: {'info': ('/', 'GET'), 'error_num': 0, 'ave_resp': 0, 'min_resp': 0, 'max_resp': 0},
     4: {'info': ('/business/6401/', 'GET'), 'error_num': 0, 'ave_resp': 0, 'min_resp': 0, 'max_resp': 0},
     5: {'info': ('/logout/', 'GET'), 'error_num': 0, 'ave_resp': 0, 'min_resp': 0, 'max_resp': 0},
+    6: {'info': ('TOTAL', 'ALL'), 'error_num': 0, 'ave_resp': 0, 'min_resp': 0, 'max_resp': 0},
 }
 
 LOAD_RECORDS = {
@@ -33,6 +35,7 @@ LOAD_RECORDS = {
     3: [],
     4: [],
     5: [],
+    6: [],
 }
 
 millis_now = lambda: int(round(time.time() * 1000))
@@ -62,6 +65,7 @@ def do_work(index, url):
     try:
         client = requests.session()
         refer_url = '%s%s' % (url, '/login/?next=/')
+        total_start = millis_now()
         start = millis_now()
         response = client.get(refer_url)
         end = millis_now()
@@ -105,10 +109,12 @@ def do_work(index, url):
         start = millis_now()
         response = client.get(logout_url, allow_redirects=False)
         end = millis_now()
+        total_end = millis_now()
         results.append((start, end))
         print '[' + t.name + '.' + str(index) + \
               '.5] Logout ... ' + '%s ... ... %s' % (end-start, response.status_code)
 
+        results.append((total_start, total_end))
         update_results(results)
 
     except Exception as e:
@@ -122,11 +128,11 @@ def working():
     print '[' + t.name + '] Sub Thread Begin'
 
     i = 0
-    while i < WORKER_CYCLE:
+    while i < THREAD_REPEAT:
         i += 1
         do_work(i, TARGET_URL['staging'])
         # do_work(i, TARGET_URL['production'])
-        sleep(LOOP_SLEEP)
+        # sleep(LOOP_SLEEP)
 
     print '[' + t.name + '] Sub Thread End'
 
@@ -136,13 +142,17 @@ def main():
 
     threads = []
 
-    for i in range(THREAD_NUM):
-        t = threading.Thread(target=working, name='T' + str(i))
-        t.daemon = True
-        threads.append(t)
+    for j in range(THREAD_BATCH):
+        for i in range(THREAD_NUM):
+            t = threading.Thread(target=working, name='T' + str(j) + '-' + str(i))
+            # t.daemon = True
+            threads.append(t)
 
-    for t in threads:
-        t.start()
+        for t in threads:
+            if not t.is_alive():
+                t.start()
+
+        time.sleep(LOOP_SLEEP)
 
     for t in threads:
         t.join()
@@ -151,9 +161,9 @@ def main():
 
     t2 = millis_now()
     print '============================================================='
-    print 'Execution Number: ', THREAD_NUM, '*', WORKER_CYCLE, '=', THREAD_NUM * WORKER_CYCLE
+    print 'Execution Number: ', THREAD_NUM, '*', THREAD_REPEAT, '*', THREAD_BATCH, '=', THREAD_NUM * THREAD_REPEAT
     print 'Total Time (ms): ', t2 - t1
-    print 'Requests per Second: %.1f' % (1.0 / ((t2 - t1) / (THREAD_NUM * WORKER_CYCLE) * 1000))
+    print 'Requests per Second: %.1f' % (1.0 / ((t2 - t1) / (THREAD_NUM * THREAD_REPEAT) * 1000))
     print '------------------------------------------------------------'
     print 'REQUEST\t\t\tACT_TYPE\tAVG_RESP\tMIN_RESP\tMAX_RESP'
     print '%-23s %s\t\t%.1f\t\t%.1f\t\t%.1f' % (LOAD_STATISTICS[1]['info'][0], LOAD_STATISTICS[1]['info'][1], LOAD_STATISTICS[1]['ave_resp'], LOAD_STATISTICS[1]['min_resp'], LOAD_STATISTICS[1]['max_resp'])
@@ -161,6 +171,7 @@ def main():
     print '%-23s %s\t\t%.1f\t\t%.1f\t\t%.1f' % (LOAD_STATISTICS[3]['info'][0], LOAD_STATISTICS[3]['info'][1], LOAD_STATISTICS[3]['ave_resp'], LOAD_STATISTICS[3]['min_resp'], LOAD_STATISTICS[3]['max_resp'])
     print '%-23s %s\t\t%.1f\t\t%.1f\t\t%.1f' % (LOAD_STATISTICS[4]['info'][0], LOAD_STATISTICS[4]['info'][1], LOAD_STATISTICS[4]['ave_resp'], LOAD_STATISTICS[4]['min_resp'], LOAD_STATISTICS[4]['max_resp'])
     print '%-23s %s\t\t%.1f\t\t%.1f\t\t%.1f' % (LOAD_STATISTICS[5]['info'][0], LOAD_STATISTICS[5]['info'][1], LOAD_STATISTICS[5]['ave_resp'], LOAD_STATISTICS[5]['min_resp'], LOAD_STATISTICS[5]['max_resp'])
+    print '%-23s %s\t\t%.1f\t\t%.1f\t\t%.1f' % (LOAD_STATISTICS[6]['info'][0], LOAD_STATISTICS[6]['info'][1], LOAD_STATISTICS[6]['ave_resp'], LOAD_STATISTICS[6]['min_resp'], LOAD_STATISTICS[6]['max_resp'])
     print '------------------------------------------------------------'
     # print LOAD_RECORDS
     ave_resp_ps = [(0, 0.000, 0, 0, 0)]
@@ -169,7 +180,7 @@ def main():
         t_sum = []
         finished_num = 0
         working_num = 0
-        record_list = LOAD_RECORDS[3]
+        record_list = LOAD_RECORDS[6]
         ts = t1 + t * 1000
         for v in record_list:
             if v[1] <= ts:
