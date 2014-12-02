@@ -1,10 +1,10 @@
 __author__ = 'y981821'
 
 import csv
+import math
 import requests
 import threading
 import time
-from time import sleep
 
 # Targets
 TARGET_URL = {
@@ -17,7 +17,7 @@ TARGET_URL = {
 THREAD_NUM = 10
 THREAD_BATCH = 3
 THREAD_REPEAT = 2
-LOOP_SLEEP = 40
+LOOP_SLEEP = 10
 
 # Statistics
 ERROR_NUM = 0
@@ -150,25 +150,17 @@ def main():
             # t.daemon = True
             threads.append(t)
             t.start()
-
-        # for t in threads:
-        #     if not t.is_alive():
-        #         print '--- try to start thread ' + t.name
-        #         t.start()
-
         time.sleep(LOOP_SLEEP)
-
     for t in threads:
         if t.isAlive():
             t.join()
-
     print 'main thread end'
 
     t2 = millis_now()
     print '============================================================='
     print 'Execution Number: ', THREAD_NUM, '*', THREAD_REPEAT, '*', THREAD_BATCH, '=', THREAD_NUM * THREAD_REPEAT
     print 'Total Time (ms): ', t2 - t1
-    print 'Requests per Second: %.1f' % (1.0 / ((t2 - t1) / (THREAD_NUM * THREAD_REPEAT) * 1000))
+    print 'Requests per micro-second: %.1f' % (1.0 / ((t2 - t1) / THREAD_NUM * THREAD_REPEAT))
     print '------------------------------------------------------------'
     print 'REQUEST\t\t\tACT_TYPE\tAVG_RESP\tMIN_RESP\tMAX_RESP'
     print '%-23s %s\t\t%.1f\t\t%.1f\t\t%.1f' % (LOAD_STATISTICS[1]['info'][0], LOAD_STATISTICS[1]['info'][1], LOAD_STATISTICS[1]['ave_resp'], LOAD_STATISTICS[1]['min_resp'], LOAD_STATISTICS[1]['max_resp'])
@@ -179,8 +171,8 @@ def main():
     print '%-23s %s\t\t%.1f\t\t%.1f\t\t%.1f' % (LOAD_STATISTICS[6]['info'][0], LOAD_STATISTICS[6]['info'][1], LOAD_STATISTICS[6]['ave_resp'], LOAD_STATISTICS[6]['min_resp'], LOAD_STATISTICS[6]['max_resp'])
     print '------------------------------------------------------------'
     # print LOAD_RECORDS
-    ave_resp_ps = [(0, 0.000, 0, 0, 0)]
-    td = (t2 - t1) / 1000
+    ave_resp_ps = [(0, 0.000, 0.000, 0.000, 0)]
+    td = int(math.ceil((t2 - t1) / 1000.0))
     for t in range(1, td + 1):
         t_sum = []
         finished_num = 0
@@ -194,7 +186,12 @@ def main():
             if v[0] <= ts <= v[1]:
                 working_num += 1
         if finished_num > 0:
-            ave_resp_ps.append((t, float('%.3f' % (float(sum(t_sum))/(finished_num*1000))), min(t_sum)/1000, max(t_sum)/1000, working_num))
+            ave_resp_ps.append((
+                t,
+                float('%.3f' % (float(sum(t_sum))/(finished_num*1000))),
+                float('%.3f' % (min(t_sum)/1000.0)),
+                float('%.3f' % (max(t_sum)/1000.0)),
+                working_num))
         else:
             pre_ave_resp = ave_resp_ps[-1][1]
             ave_resp_ps.append((t, pre_ave_resp, 0, 0, working_num))
