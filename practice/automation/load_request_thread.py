@@ -158,7 +158,8 @@ def main():
 
     t2 = millis_now()
     print '============================================================='
-    print 'Execution Number: ', THREAD_NUM, '*', THREAD_REPEAT, '*', THREAD_BATCH, '=', THREAD_NUM * THREAD_REPEAT
+    print 'Execution Number: ', THREAD_NUM, '*', THREAD_REPEAT, '*', THREAD_BATCH, \
+        '=', THREAD_NUM * THREAD_REPEAT * THREAD_BATCH
     print 'Total Time (ms): ', t2 - t1
     print 'Requests per micro-second: %.1f' % (1.0 / ((t2 - t1) / THREAD_NUM * THREAD_REPEAT))
     print '------------------------------------------------------------'
@@ -185,7 +186,9 @@ def main():
                 t_sum.append(v[1] - v[0])
             if v[0] <= ts <= v[1]:
                 working_num += 1
-        if finished_num > 0:
+        if finished_num == THREAD_NUM * THREAD_REPEAT * THREAD_BATCH:
+            ave_resp_ps.append((t, 0.000, 0.000, 0.000, 0))
+        elif finished_num > 0:
             ave_resp_ps.append((
                 t,
                 float('%.3f' % (float(sum(t_sum))/(finished_num*1000))),
