@@ -13,10 +13,10 @@ TARGET_URL = {
 }
 
 # Configuration
-THREAD_NUM = 20
+THREAD_NUM = 10
 THREAD_BATCH = 3
 THREAD_REPEAT = 2
-LOOP_SLEEP = 20
+LOOP_SLEEP = 10
 
 # Statistics
 ERROR_NUM = 0
@@ -150,6 +150,7 @@ def main():
 
         for t in threads:
             if not t.is_alive():
+                print '--- try to start thread ' + t.name
                 t.start()
 
         time.sleep(LOOP_SLEEP)
