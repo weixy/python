@@ -8,6 +8,7 @@ from time import sleep
 
 # Targets
 TARGET_URL = {
+    'uat': 'http://sem.uat.ytech.co.nz',
     'staging': 'https://staging.sem.yellow.co.nz',
     'production': 'https://sem.yellow.co.nz'
 }
@@ -16,7 +17,7 @@ TARGET_URL = {
 THREAD_NUM = 10
 THREAD_BATCH = 3
 THREAD_REPEAT = 2
-LOOP_SLEEP = 10
+LOOP_SLEEP = 40
 
 # Statistics
 ERROR_NUM = 0
@@ -130,6 +131,7 @@ def working():
     i = 0
     while i < THREAD_REPEAT:
         i += 1
+        # do_work(i, TARGET_URL['uat'])
         do_work(i, TARGET_URL['staging'])
         # do_work(i, TARGET_URL['production'])
         # sleep(LOOP_SLEEP)
@@ -147,16 +149,18 @@ def main():
             t = threading.Thread(target=working, name='T' + str(j) + '-' + str(i))
             # t.daemon = True
             threads.append(t)
+            t.start()
 
-        for t in threads:
-            if not t.is_alive():
-                print '--- try to start thread ' + t.name
-                t.start()
+        # for t in threads:
+        #     if not t.is_alive():
+        #         print '--- try to start thread ' + t.name
+        #         t.start()
 
         time.sleep(LOOP_SLEEP)
 
     for t in threads:
-        t.join()
+        if t.isAlive():
+            t.join()
 
     print 'main thread end'
 
