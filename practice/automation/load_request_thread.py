@@ -16,10 +16,10 @@ TARGET_URL = {
 }
 
 # Configuration
-THREAD_NUM = 2
-THREAD_BATCH = 1
-THREAD_REPEAT = 1
-LOOP_SLEEP = 10
+THREAD_NUM = 10
+THREAD_BATCH = 3
+THREAD_REPEAT = 2
+LOOP_SLEEP = 15
 
 # Steps
 TEST_STEPS = [
@@ -43,22 +43,13 @@ class RequestStatistics():
         self.max_resp = 0.0
 ERROR_NUM = 0
 LOAD_STATISTICS = [RequestStatistics(step['req_txt'], step['req_type']) for step in TEST_STEPS]
-# LOAD_STATISTICS = {
-#     1: {'info': ('/login/?next=/', 'GET'), 'error_num': 0, 'ave_resp': 0, 'min_resp': 0, 'max_resp': 0},
-#     2: {'info': ('/login/login?next=%2F', 'POST'), 'error_num': 0, 'ave_resp': 0, 'min_resp': 0, 'max_resp': 0},
-#     3: {'info': ('/', 'GET'), 'error_num': 0, 'ave_resp': 0, 'min_resp': 0, 'max_resp': 0},
-#     4: {'info': ('/business/6401/', 'GET'), 'error_num': 0, 'ave_resp': 0, 'min_resp': 0, 'max_resp': 0},
-#     5: {'info': ('/logout/', 'GET'), 'error_num': 0, 'ave_resp': 0, 'min_resp': 0, 'max_resp': 0},
-#     6: {'info': ('TOTAL', 'ALL'), 'error_num': 0, 'ave_resp': 0, 'min_resp': 0, 'max_resp': 0},
-# }
-
 LOAD_RECORDS = {
+    0: [],
     1: [],
     2: [],
     3: [],
     4: [],
     5: [],
-    6: [],
 }
 
 millis_now = lambda: int(round(time.time() * 1000))
@@ -68,16 +59,16 @@ def calculate_result(results):
     global LOAD_STATISTICS
     lock = threading.RLock()
     for i in range(0, len(results)):
-        statistics_dict = LOAD_STATISTICS[i+1]
-        records_list = LOAD_RECORDS[i+1]
+        statistics = LOAD_STATISTICS[i]
+        records_list = LOAD_RECORDS[i]
         records_list.append(results[i])
         dur_list = [v[1] - v[0] for v in records_list]
-        statistics_dict['ave_resp'] = sum(dur_list)/float(len(dur_list))
-        statistics_dict['min_resp'] = min(dur_list)
-        statistics_dict['max_resp'] = max(dur_list)
+        statistics.ave_resp = sum(dur_list)/float(len(dur_list))
+        statistics.min_resp = min(dur_list)
+        statistics.max_resp = max(dur_list)
         lock.acquire()
-        LOAD_STATISTICS[i+1] = statistics_dict
-        LOAD_RECORDS[i+1] = records_list
+        LOAD_STATISTICS[i] = statistics
+        LOAD_RECORDS[i] = records_list
         lock.release()
 
 
@@ -89,141 +80,103 @@ class LoadRequest():
         self.headers = headers
         self.redirects = allow_redirects
 
-    def request(self):
-        client = requests.session()
+    def request(self, client):
+        if client is None:
+            client = requests.session()
         start = millis_now()
-        response = client.get(self.url)
+        if self.action_type.lower() == 'GET'.lower():
+            response = client.get(self.url, allow_redirects=self.redirects)
+        elif self.action_type.lower() == 'POST'.lower():
+            response = client.post(self.url, data=self.data, headers=self.headers, allow_redirects=self.redirects)
+        else:
+            response = None
         end = millis_now()
         return client, response, start, end
 
 
 class LoadThread(threading.Thread):
-    def __init__(self, repeat):
+    def __init__(self, name):
         threading.Thread.__init__(self)
-        self.results = []
+        # self.results = []
         self.update = calculate_result
-        self.repeat_times = repeat
+        self.name = name
 
     def do_work(self):
         domain = TARGET_URL[ENV]
         total_start = millis_now()
+        client = None
+        try:
+            # Step 1
+            s = TEST_STEPS[1]
+            start_url = domain + s['req_txt']
+            step_req = LoadRequest(start_url, s['req_type'])
+            client, response, start, end = step_req.request(client)
+            self.results.append((start, end))
+            print '>>> [%s] Step 1: Extract token, spent %s (ms) with code %s' % (
+                self.name, end-start, response.status_code)
 
-        # Step 1
-        s = TEST_STEPS[1]
-        start_url = domain + s['req_txt']
-        step_req = LoadRequest(start_url, s['req_type'])
-        client, response, start, end = step_req.request()
-        self.results.append((start, end))
-        print '>>> [%s] Step 1: Extract token, spent %s (ms) with code %s' % (
-            self.name, end-start, response.status_code)
+            token = client.cookies['csrftoken']
 
-        token = client.cookies['csrftoken']
+            # Step 2
+            login_data = dict(
+                username='developers@finda.co.nz',
+                password='QAWSEDRFTG', csrfmiddlewaretoken=token
+            )
+            s = TEST_STEPS[2]
+            step_req = LoadRequest(
+                domain + s['req_txt'],
+                s['req_type'],
+                data=login_data,
+                headers=dict(Referer=start_url),
+            )
+            client, response, start, end = step_req.request(client)
+            self.results.append((start, end))
+            print '>>> [%s] Step 2: Login Murray, spent %s (ms) with code %s' % (
+                self.name, end-start, response.status_code)
 
-        # Step 2
-        login_data = dict(
-            username='developers@finda.co.nz',
-            password='QAWSEDRFTG', csrfmiddlewaretoken=token
-        )
-        s = TEST_STEPS[2]
-        step_req = LoadRequest(domain + s['req_txt'], s['req_type'], login_data, dict(Referer=start_url))
-        client, response, start, end = step_req.request()
-        self.results.append((start, end))
-        print '>>> [%s] Step 2: Login Murray, spent %s (ms) with code %s' % (
-            self.name, end-start, response.status_code)
+            redirect_url = response.headers['Location']
 
-        redirect_url = response.headers['Location']
+            # Step 3
+            s = TEST_STEPS[3]
+            step_req = LoadRequest(redirect_url, s['req_type'])
+            client, response, start, end = step_req.request(client)
+            self.results.append((start, end))
+            print '>>> [%s] Step 3: Load start page with SEM Dashboard, spent %s (ms) with code %s' % (
+                self.name, end-start, response.status_code)
 
-        # Step 3
-        s = TEST_STEPS[3]
-        step_req = LoadRequest(redirect_url, s['req_type'])
-        client, response, start, end = step_req.request()
-        self.results.append((start, end))
-        print '>>> [%s] Step 3: Load start page with SEM Dashboard, spent %s (ms) with code %s' % (
-            self.name, end-start, response.status_code)
+            # Step 4
+            s = TEST_STEPS[4]
+            step_req = LoadRequest(domain + s['req_txt'], s['req_type'])
+            client, response, start, end = step_req.request(client)
+            self.results.append((start, end))
+            print '>>> [%s] Step 4: Open a business, spent %s (ms) with code %s' % (
+                self.name, end-start, response.status_code)
 
-        total_end = millis_now()
-        self.results.append((total_start, total_end))
-        self.update(self.results)
+            # Step 5
+            s = TEST_STEPS[5]
+            step_req = LoadRequest(domain + s['req_txt'], s['req_type'])
+            client, response, start, end = step_req.request(client)
+            self.results.append((start, end))
+            print '>>> [%s] Step 5: Logout Murray, spent %s (ms) with code %s' % (
+                self.name, end-start, response.status_code)
 
+            total_end = millis_now()
+            self.results.insert(0, (total_start, total_end))
+            self.update(self.results)
+        except Exception as e:
+            print 'Failed with exception \'%s\': \n%s' % (e.__class__, e.message)
+            global ERROR_NUM
+            ERROR_NUM += 1
 
-def do_work(index, url):
-    t = threading.currentThread()
-    results = []
-
-    try:
-        client = requests.session()
-        refer_url = '%s%s' % (url, '/login/?next=/')
-        total_start = millis_now()
-        start = millis_now()
-        response = client.get(refer_url)
-        end = millis_now()
-        results.append((start, end))
-        print '[' + t.name + '.' + str(index) + \
-              '.1] Extract token ... ' + '%s (ms) ... ... %s' % (end-start, response.status_code)
-        csrftoken = client.cookies['csrftoken']
-
-        login_data = dict(
-            username='test_auto_user0' + str(index-1) + '@yellow.co.nz',
-            password='test123', csrfmiddlewaretoken=csrftoken
-        )
-        login_url = '%s%s' % (url, '/login/login?next=%2F')
-        start = millis_now()
-        response = client.post(login_url, data=login_data, headers=dict(Referer=refer_url), allow_redirects=False)
-        end = millis_now()
-        results.append((start, end))
-        print '[' + t.name + '.' + str(index) + \
-              '.2] Login ... ' + '%s (ms) ... ... %s' % (end-start, response.status_code)
-        redirect_url = response.headers['Location']
-
-        start = millis_now()
-        response = client.get(redirect_url, allow_redirects=False)
-        end = millis_now()
-        results.append((start, end))
-        print '[' + t.name + '.' + str(index) + \
-              '.3] Load page after login ... ' + '%s (ms) ... ... %s' % (end-start, response.status_code)
-
-        busi_url = '%s%s' % (url, '/business/6401/')
-        start = millis_now()
-        response = client.get(busi_url, allow_redirects=False)
-        end = millis_now()
-        results.append((start, end))
-        if response.status_code == 302 and 'Location' in response.headers:
-            relocation = response.headers['Location']
-            print relocation
-        print '[' + t.name + '.' + str(index) + \
-              '.4] Open a business ... ' + '%s (ms) ... ... %s' % (end-start, response.status_code)
-
-        logout_url = '%s%s' % (url, '/logout/')
-        start = millis_now()
-        response = client.get(logout_url, allow_redirects=False)
-        end = millis_now()
-        total_end = millis_now()
-        results.append((start, end))
-        print '[' + t.name + '.' + str(index) + \
-              '.5] Logout ... ' + '%s ... ... %s' % (end-start, response.status_code)
-
-        results.append((total_start, total_end))
-        calculate_result(results)
-
-    except Exception as e:
-        print 'Failed with exception \'%s\': \n%s' % (e.__class__, e.message)
-        global ERROR_NUM
-        ERROR_NUM += 1
-
-
-def working():
-    t = threading.currentThread()
-    print '[' + t.name + '] Sub Thread Begin'
-
-    i = 0
-    while i < THREAD_REPEAT:
-        i += 1
-        # do_work(i, TARGET_URL['uat'])
-        do_work(i, TARGET_URL['staging'])
-        # do_work(i, TARGET_URL['production'])
-        # sleep(LOOP_SLEEP)
-
-    print '[' + t.name + '] Sub Thread End'
+    def run(self):
+        t = threading.currentThread()
+        print '>> Sub thread [%s] begin' % t.name
+        i = 0
+        while i < THREAD_REPEAT:
+            i += 1
+            self.results = []
+            self.do_work()
+        print '>> Sub thread [%s] end' % t.name
 
 
 def main():
@@ -233,7 +186,7 @@ def main():
 
     for j in range(THREAD_BATCH):
         for i in range(THREAD_NUM):
-            t = threading.Thread(target=working, name='T' + str(j) + '-' + str(i))
+            t = LoadThread(name='T' + str(j) + '-' + str(i))
             # t.daemon = True
             threads.append(t)
             t.start()
@@ -251,12 +204,8 @@ def main():
     # print 'Requests per micro-second: %.1f' % ((1.0 * THREAD_NUM * THREAD_REPEAT * THREAD_BATCH) / (t2 - t1))
     print '------------------------------------------------------------'
     print 'REQUEST\t\t\tACT_TYPE\tAVG_RESP\tMIN_RESP\tMAX_RESP'
-    print '%-23s %s\t\t%.1f\t\t%.1f\t\t%.1f' % (LOAD_STATISTICS[1]['info'][0], LOAD_STATISTICS[1]['info'][1], LOAD_STATISTICS[1]['ave_resp'], LOAD_STATISTICS[1]['min_resp'], LOAD_STATISTICS[1]['max_resp'])
-    print '%-23s %s\t\t%.1f\t\t%.1f\t\t%.1f' % (LOAD_STATISTICS[2]['info'][0], LOAD_STATISTICS[2]['info'][1], LOAD_STATISTICS[2]['ave_resp'], LOAD_STATISTICS[2]['min_resp'], LOAD_STATISTICS[2]['max_resp'])
-    print '%-23s %s\t\t%.1f\t\t%.1f\t\t%.1f' % (LOAD_STATISTICS[3]['info'][0], LOAD_STATISTICS[3]['info'][1], LOAD_STATISTICS[3]['ave_resp'], LOAD_STATISTICS[3]['min_resp'], LOAD_STATISTICS[3]['max_resp'])
-    print '%-23s %s\t\t%.1f\t\t%.1f\t\t%.1f' % (LOAD_STATISTICS[4]['info'][0], LOAD_STATISTICS[4]['info'][1], LOAD_STATISTICS[4]['ave_resp'], LOAD_STATISTICS[4]['min_resp'], LOAD_STATISTICS[4]['max_resp'])
-    print '%-23s %s\t\t%.1f\t\t%.1f\t\t%.1f' % (LOAD_STATISTICS[5]['info'][0], LOAD_STATISTICS[5]['info'][1], LOAD_STATISTICS[5]['ave_resp'], LOAD_STATISTICS[5]['min_resp'], LOAD_STATISTICS[5]['max_resp'])
-    print '%-23s %s\t\t%.1f\t\t%.1f\t\t%.1f' % (LOAD_STATISTICS[6]['info'][0], LOAD_STATISTICS[6]['info'][1], LOAD_STATISTICS[6]['ave_resp'], LOAD_STATISTICS[6]['min_resp'], LOAD_STATISTICS[6]['max_resp'])
+    for s in LOAD_STATISTICS:
+        print '%-23s %s\t\t%.1f\t\t%.1f\t\t%.1f' % (s.req_text, s.req_type, s.ave_resp, s.min_resp, s.max_resp)
     print '------------------------------------------------------------'
     # print LOAD_RECORDS
     ave_resp_ps = [(0, 0.000, 0.000, 0.000, 0)]
@@ -265,7 +214,7 @@ def main():
         t_sum = []
         finished_num = 0
         working_num = 0
-        record_list = LOAD_RECORDS[6]
+        record_list = LOAD_RECORDS[0]
         ts = t1 + t * 1000
         for v in record_list:
             if v[1] <= ts:
@@ -297,6 +246,4 @@ if __name__ == '__main__':
                         help='Set the environment to run on. (uat/staging/production).')
     args = parser.parse_args()
     ENV = args.env
-    # main()
-    # for i in LOAD_STATISTICS:
-    #     print i.req_text + ', ' + i.req_type + ', ' + str(i.ave_resp)
+    main()
