@@ -9,6 +9,7 @@ import time
 
 # Targets
 ENV = 'staging'
+REPORT = 'csv'
 TARGET_URL = {
     'uat': 'http://sem.uat.ytech.co.nz',
     'staging': 'https://staging.sem.yellow.co.nz',
@@ -242,8 +243,11 @@ def main():
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run a load test on Hydrogen API')
-    parser.add_argument('--env', dest='env', default='staging',
-                        help='Set the environment to run on. (uat/staging/production).')
+    parser.add_argument('-e', '--env', dest='env', default='staging',
+                        help='Set the environment to run on (uat/staging/production).')
+    parser.add_argument('-r', '--report', dest='report', default='csv',
+                        help='Set the report format as (csv/json/html).')
     args = parser.parse_args()
     ENV = args.env
+    REPORT = args.report
     main()
