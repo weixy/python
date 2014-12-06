@@ -44,8 +44,8 @@ def draw_svg_csv(data):
     print data
     svg_margin_x = 150
     svg_margin_y = 50
-    svg_width = 1000
-    svg_height = 400
+    svg_width = 800
+    svg_height = 300
 
     max_x = len(data)
     num_x = max_x / 10 + 1
