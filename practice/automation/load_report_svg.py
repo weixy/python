@@ -47,6 +47,7 @@ def draw_svg_csv(data):
     svg_margin_y = 50
     svg_width = 1000
     svg_height = 400
+
     max_x = len(data)
     num_x = max_x / 10 + 1
     step_x = svg_width / num_x
@@ -59,11 +60,12 @@ def draw_svg_csv(data):
     grp_data = dwg.g(id='g_data')
     # Draw x axle
     for i in range(num_x + 1):
-        grp_grid.add(dwg.line(start=(svg_margin_x + step_x * i, svg_height + svg_margin_y),
-                              end=(svg_margin_x + step_x * i, svg_height + svg_margin_y + 10),
-                              style='stroke: black; stroke-dasharray: 1 2; stroke-width: 1;'))
+        if i != 0 and i != num_x:
+            grp_grid.add(dwg.line(start=(svg_margin_x + step_x * i, svg_height + svg_margin_y),
+                                  end=(svg_margin_x + step_x * i, svg_margin_y),
+                                  style='stroke: black; stroke-dasharray: 1 2; stroke-width: 1;'))
         grp_grid.add(dwg.text(0 + 10 * i, fill='darkgray',
-                              insert=(svg_margin_x + step_x * i, svg_height + svg_margin_y + 20),
+                              insert=(svg_margin_x + step_x * i, svg_height + svg_margin_y + 15),
                               style='font-family: Arial; font-size: 11px; kerning: 1; text-anchor: middle;'))
     # Draw y-axle and line for each statistics
     times = [d[0] for d in data]
@@ -71,7 +73,7 @@ def draw_svg_csv(data):
 
     for i in range(1, 5):
         l = [d[i] for d in data]
-        max_y = round(max(l if i == 4 else max_l) * 1.5)
+        max_y = round(max(l if i == 4 else max_l) * 1.1)
         num_y = 5
         step_y = round(svg_height / num_y)
         margin_x = 0
@@ -85,13 +87,13 @@ def draw_svg_csv(data):
             color = 'rgb(0, 147, 255)'
             angle = '270'
         elif i == 1:
-            margin_x = svg_margin_x + svg_width + svg_margin_x / 4
+            margin_x = svg_margin_x + svg_width + svg_margin_x / 6
             axle_y_text = 'Average Response Time (Sec)'
             color = 'rgb(78, 165, 41)'
             angle = '90'
             left_y = -1
         elif i == 2:
-            margin_x = svg_margin_x + svg_width + svg_margin_x / 2
+            margin_x = svg_margin_x + svg_width + svg_margin_x / 3
             axle_y_text = 'Minimum Response Time (Sec)'
             color = 'rgb(127, 190, 251)'
             angle = '90'
@@ -128,7 +130,7 @@ def draw_svg_csv(data):
             p += 1
         print points
         grp_data.add(dwg.polyline(points, fill='none', stroke=color,
-                                  style='stroke-width:3; stroke-linecap:round;'))
+                                  style='stroke-dasharray:5 4; stroke-width:3; stroke-linecap:round;'))
 
     # dwg.add(grp_bkgrnd)
     dwg.add(grp_grid)
