@@ -209,14 +209,15 @@ def main():
         print '%-23s %s\t\t%.1f\t\t%.1f\t\t%.1f' % (s.req_text, s.req_type, s.ave_resp, s.min_resp, s.max_resp)
     print '------------------------------------------------------------'
     # print LOAD_RECORDS
-    ave_resp_ps = [(0, 0.000, 0.000, 0.000, 0)]
-    td = int(math.ceil((t2 - t1) / 1000.0))
+    ave_resp_ps = [(0.0, 0.000, 0.000, 0.000, 0)]
+    t_step = 1
+    td = int(math.ceil((t2 - t1) / (t_step * 1000.0)))
     for t in range(1, td + 1):
         t_sum = []
         finished_num = 0
         working_num = 0
         record_list = LOAD_RECORDS[0]
-        ts = t1 + t * 1000
+        ts = t1 + t * t_step * 1000
         for v in record_list:
             if v[1] <= ts:
                 finished_num += 1
@@ -224,17 +225,17 @@ def main():
             if v[0] <= ts <= v[1]:
                 working_num += 1
         if finished_num == THREAD_NUM * THREAD_REPEAT * THREAD_BATCH:
-            ave_resp_ps.append((t, 0.000, 0.000, 0.000, 0))
+            ave_resp_ps.append((t * t_step, 0.000, 0.000, 0.000, 0))
         elif finished_num > 0:
             ave_resp_ps.append((
-                t,
+                t * t_step,
                 float('%.3f' % (float(sum(t_sum))/(finished_num*1000))),
                 float('%.3f' % (min(t_sum)/1000.0)),
                 float('%.3f' % (max(t_sum)/1000.0)),
                 working_num))
         else:
             pre_ave_resp = ave_resp_ps[-1][1]
-            ave_resp_ps.append((t, pre_ave_resp, 0, 0, working_num))
+            ave_resp_ps.append((t * t_step, pre_ave_resp, 0, 0, working_num))
     # print ave_resp_ps
     with open('ave_resp_persec.csv', 'wb') as f:
         writer = csv.writer(f)
