@@ -1,6 +1,5 @@
 __author__ = 'weixy'
 
-import os
 import svgwrite
 
 
@@ -54,7 +53,7 @@ def draw_svg_csv(data):
 
     dwg = svgwrite.Drawing('load_report.svg', profile='full')
     grp_bkgrnd = dwg.g(id='background')
-    grp_bkgrnd.add(dwg.rect(insert=(0, 0), size=('100%', '100%'), rx=None, ry=None, fill='#83ACEC'))
+    grp_bkgrnd.add(dwg.rect(insert=(0, 0), size=('100%', '100%'), rx=None, ry=None, fill='rgb(242, 242, 242)'))
 
     grp_grid = dwg.g(id='g_grid')
     grp_data = dwg.g(id='g_data')
@@ -132,7 +131,7 @@ def draw_svg_csv(data):
         grp_data.add(dwg.polyline(points, fill='none', stroke=color,
                                   style='stroke-dasharray:5 4; stroke-width:3; stroke-linecap:round;'))
 
-    # dwg.add(grp_bkgrnd)
+    dwg.add(grp_bkgrnd)
     dwg.add(grp_grid)
     dwg.add(grp_data)
     dwg.save()
