@@ -60,6 +60,7 @@ def draw_svg_csv(data):
 
     max_x = len(data)
     num_x = max_x / 10 + 1
+    max_x = num_x * 10
     step_x = svg_width / num_x
 
     dwg = svgwrite.Drawing('load_report.svg', profile='full',
@@ -130,20 +131,22 @@ def draw_svg_csv(data):
 
     # Draw data
     points_thd = zip(times, thd_l)
-    pixels_thd = [(svg_margin_x + round(p[0] * (svg_width / max_x)),
+    pixels_thd = [(svg_margin_x + round(p[0] * (float(svg_width) / max_x)),
                   svg_height + svg_margin_y - round(p[1] * (float(svg_height) / thd_y_max))) for p in points_thd]
     grp_data.add(dwg.polyline(pixels_thd, fill='none', stroke=thread_color,
                               style='stroke-width:2; stroke-linecap:round;'))
+    print max_x, float(svg_width) / max_x, num_x
+    print thd_y_max, thd_y_step, thd_y_num, thd_y_dist
     print points_thd
     print pixels_thd
     points_ave = zip(times, ave_l)
-    pixels_ave = [(svg_margin_x + round(p[0] * (svg_width / max_x)),
+    pixels_ave = [(svg_margin_x + round(p[0] * (float(svg_width) / max_x)),
                   svg_height + svg_margin_y - round(p[1] * (float(svg_height) / max_y_max))) for p in points_ave]
     grp_data.add(dwg.polyline(pixels_ave, fill='none', stroke=average_color,
                               style='stroke-dasharray:6 6; stroke-width:2; stroke-linecap:round;'))
 
     points_max = zip(times, max_l)
-    pixels_max = [(svg_margin_x + round(p[0] * (svg_width / max_x)),
+    pixels_max = [(svg_margin_x + round(p[0] * (float(svg_width) / max_x)),
                   svg_height + svg_margin_y - round(p[1] * (float(svg_height) / max_y_max))) for p in points_max]
     grp_data.add(dwg.polyline(pixels_max, fill='none', stroke=maximum_color,
                               style='stroke-dasharray:3 3; stroke-width:2; stroke-linecap:round;'))
