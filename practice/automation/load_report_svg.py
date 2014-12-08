@@ -41,7 +41,7 @@ def get_axle_value(v):
 
 
 def draw_svg_csv(data):
-    svg_margin_x = 150
+    svg_margin_x = 100
     svg_margin_y = 50
     svg_width = 800
     svg_height = 300
@@ -133,12 +133,11 @@ def draw_svg_csv(data):
     points_thd = zip(times, thd_l)
     pixels_thd = [(svg_margin_x + round(p[0] * (float(svg_width) / max_x)),
                   svg_height + svg_margin_y - round(p[1] * (float(svg_height) / thd_y_max))) for p in points_thd]
-    grp_data.add(dwg.polyline(pixels_thd, fill='none', stroke=thread_color,
-                              style='stroke-width:2; stroke-linecap:round;'))
-    print max_x, float(svg_width) / max_x, num_x
-    print thd_y_max, thd_y_step, thd_y_num, thd_y_dist
-    print points_thd
-    print pixels_thd
+    line = dwg.polyline(pixels_thd, fill='none', stroke=thread_color,
+                              style='stroke-width:2; stroke-linecap:round;')
+    line.set_desc(desc='thread')
+    grp_data.add(line)
+
     points_ave = zip(times, ave_l)
     pixels_ave = [(svg_margin_x + round(p[0] * (float(svg_width) / max_x)),
                   svg_height + svg_margin_y - round(p[1] * (float(svg_height) / max_y_max))) for p in points_ave]
