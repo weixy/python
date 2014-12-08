@@ -133,10 +133,8 @@ def draw_svg_csv(data):
     points_thd = zip(times, thd_l)
     pixels_thd = [(svg_margin_x + round(p[0] * (float(svg_width) / max_x)),
                   svg_height + svg_margin_y - round(p[1] * (float(svg_height) / thd_y_max))) for p in points_thd]
-    line = dwg.polyline(pixels_thd, fill='none', stroke=thread_color,
-                              style='stroke-width:2; stroke-linecap:round;')
-    line.set_desc(desc='thread')
-    grp_data.add(line)
+    grp_data.add(dwg.polyline(pixels_thd, fill='none', stroke=thread_color,
+                              style='stroke-width:2; stroke-linecap:round; linejoin:round;'))
 
     points_ave = zip(times, ave_l)
     pixels_ave = [(svg_margin_x + round(p[0] * (float(svg_width) / max_x)),
