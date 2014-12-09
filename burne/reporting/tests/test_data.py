@@ -1,5 +1,7 @@
 import unittest
-from ..utils.svg.data import ReportData
+
+from ..utils.data.data import ChartData
+
 
 # Create your tests here.
 
@@ -31,11 +33,12 @@ class DataAnalystTest(unittest.TestCase):
         self.assertGreater(len(self.test_data), 0)
 
     def test_initial_report_data_obj(self):
-        rep_data = ReportData(self.data_dict, self.test_data)
-        self.assertTrue(rep_data.is_index_data_matched())
-        sep_tables = rep_data.separated_tables()
-        self.assertTrue(len(sep_tables) == 4)
-        self.assertTrue(sep_tables[0]['title'] == 'Average Response Time (sec)')
+        chart_data = ChartData(self.data_dict, self.test_data)
+        self.assertTrue(chart_data.is_index_data_matched())
+        plots = chart_data.get_plots()
+        self.assertTrue(len(plots) == 4)
+        self.assertTrue(plots[0].title == 'Average Response Time (sec)')
+        self.assertTrue(len(plots[0].data) == len(chart_data.raw_data))
 
 
 if __name__ == '__main__':

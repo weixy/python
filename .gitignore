@@ -4,3 +4,4 @@ db.sqlite3
 *.har
 *.log
 .cache
+_target
