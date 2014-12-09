@@ -5,8 +5,14 @@ import svgwrite
 
 class AxleStyle():
 
-    def __init__(self, color, line_style, text_style, show_axle=False):
+    _UP_ = 'up'
+    _DOWN_ = 'down'
+    _LEFT_ = 'left'
+    _RIGHT_ = 'right'
+
+    def __init__(self, color, position, line_style, text_style, show_axle=False):
         self.color = color
+        self.position = position
         self.line_style = line_style
         self.text_style = text_style
         self.showAxle = show_axle
