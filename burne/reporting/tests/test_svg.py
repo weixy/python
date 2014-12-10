@@ -16,8 +16,8 @@ class LineChartTest(unittest.TestCase):
         dom = minidom.parse(line_chart.filename)
         root = dom.documentElement
         self.assertTrue(root.nodeName == 'svg')
-        grps = root.getElementsByTagName('g')
-        self.assertTrue(grps[0].getAttribute('class') == 'background')
+        groups = root.getElementsByTagName('g')
+        self.assertTrue(groups[0].getAttribute('class') == 'background')
         dom.unlink()
 
     def test_line_chart_axle(self):
@@ -52,6 +52,21 @@ class LineChartTest(unittest.TestCase):
         )
         line_chart.draw_axle('Current Threads', 70, 10, axle_style)
         line_chart.save()
+        dom = minidom.parse(line_chart.filename)
+        root = dom.documentElement
+        self.assertTrue(root.nodeName == 'svg')
+        groups = root.getElementsByTagName('g')
+        for i in range(1, len(groups)):
+            self.assertTrue(groups[i].getAttribute('class') == 'axle')
+        descs = groups[1].getElementsByTagName('desc')
+        self.assertTrue(descs[0].firstChild.nodeValue == 'Time (sec)')
+        descs = groups[2].getElementsByTagName('desc')
+        self.assertTrue(descs[0].firstChild.nodeValue == 'Time (sec)')
+        descs = groups[3].getElementsByTagName('desc')
+        self.assertTrue(descs[0].firstChild.nodeValue == 'Time (sec)')
+        descs = groups[4].getElementsByTagName('desc')
+        self.assertTrue(descs[0].firstChild.nodeValue == 'Time (sec)')
+        dom.unlink()
 
 if __name__ == '__main__':
     unittest.main(warnings='ignore')

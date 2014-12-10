@@ -10,30 +10,47 @@ WIDTH_ = 0
 HEIGHT_ = 1
 
 
-def get_gradation(point, axle_position, chart_size):
-    gradation = [
+def get_gradation(axle_zero_point, gradation_pixel, axle_position, chart_size):
+    gradation_offset = [
         {
+            'gradation_point': (1, 0),
             'gradation_end_point': (0, 7),
             'number_insert_point': (0, -10),
             'gradation_line_end_point': (0, chart_size[HEIGHT_]),
         },
         {
+            'gradation_point': (1, 0),
             'gradation_end_point': (0, -7),
             'number_insert_point': (0, 15),
             'gradation_line_end_point': (0, -1 * chart_size[HEIGHT_]),
         },
         {
-            'gradation_end_point': (0, 7),
-            'number_insert_point': (0, -15),
+            'gradation_point': (0, -1),
+            'gradation_end_point': (7, 0),
+            'number_insert_point': (-15, 0),
             'gradation_line_end_point': (chart_size[WIDTH_], 0),
         },
         {
-            'gradation_end_point': (0, -7),
-            'number_insert_point': (0, 15),
+            'gradation_point': (0, -1),
+            'gradation_end_point': (-7, 0),
+            'number_insert_point': (15, 0),
             'gradation_line_end_point': (-1 * chart_size[WIDTH_], 0),
         },
     ]
-    pass
+    grd = gradation_offset[axle_position]
+    grd_point = grd['gradation_point']
+    point = (
+        axle_zero_point[0] + grd_point[0] * gradation_pixel,
+        axle_zero_point[1] + grd_point[1] * gradation_pixel
+    )
+    grd_end_point = grd['gradation_end_point']
+    num_ins_point = grd['number_insert_point']
+    grd_lin_end_point = grd['gradation_line_end_point']
+    return \
+        point, \
+        (point[0] + grd_end_point[0], point[1] + grd_end_point[1]), \
+        (point[0] + num_ins_point[0], point[1] + num_ins_point[1]), \
+        (point[0] + grd_lin_end_point[0], point[1] + grd_lin_end_point[1])
 
 
 # return axle's start point, end point and length
@@ -121,59 +138,14 @@ class SVGChart():
 
         if axs.show_gradation or axs.show_number:
             for i in range(num_gradation + 1):
-                gradation_x = start_position[0]
-                gradation_y = start_position[1]
-                end_x = 0
-                end_y = 0
-                num_x = 0
-                num_y = 0
-                end_g_x = 0
-                end_g_y = 0
-                if axs.position == UP_:
-                    gradation_x += i * pix_gradation
-                    end_x = gradation_x
-                    end_y = gradation_y + 7
-                    num_x = gradation_x
-                    num_y = gradation_y - 10
-                    end_g_x = end_x
-                    end_g_y = gradation_y + self.size[HEIGHT_]
-                elif axs.position == DOWN_:
-                    gradation_x += i * pix_gradation
-                    end_x = gradation_x
-                    end_y = gradation_y - 7
-                    num_x = gradation_x
-                    num_y = gradation_y + 15
-                    end_g_x = end_x
-                    end_g_y = gradation_y - self.size[HEIGHT_]
-                elif axs.position == LEFT_:
-                    gradation_y -= i * pix_gradation
-                    end_x = gradation_x + 7
-                    end_y = gradation_y
-                    num_x = gradation_x - 15
-                    num_y = gradation_y
-                    end_g_x = end_x + self.size[WIDTH_]
-                    end_g_y = gradation_y
-                elif axs.position == RIGHT_:
-                    gradation_y -= i * pix_gradation
-                    end_x = gradation_x - 7
-                    end_y = gradation_y
-                    num_x = gradation_x + 15
-                    num_y = gradation_y
-                    end_g_x = end_x - self.size[WIDTH_]
-                    end_g_y = gradation_y
+                g, end, num, g_line = get_gradation(start_position, i * pix_gradation, axs.position, self.size)
 
                 if axs.show_gradation:
-                    axl_grp.add(dwg.line(start=(gradation_x, gradation_y),
-                                         end=(end_x, end_y),
-                                         stroke=axs.color, style=axs.line_style))
+                    axl_grp.add(dwg.line(start=g, end=end, stroke=axs.color, style=axs.line_style))
                 if axs.show_number:
-                    axl_grp.add(dwg.text(0 + i * increment_gradation,
-                                         insert=(num_x, num_y),
-                                         style=axs.text_style))
+                    axl_grp.add(dwg.text(0 + i * increment_gradation, insert=num, style=axs.text_style))
                 if axs.show_gradation_line:
-                    axl_grp.add(dwg.line(start=(gradation_x, gradation_y),
-                                         end=(end_g_x, end_g_y),
-                                         stroke=axs.color, style=axs.line_style))
+                    axl_grp.add(dwg.line(start=g, end=g_line, stroke=axs.color, style=axs.line_style))
         dwg.add(axl_grp)
 
     def draw_data(self, data):
