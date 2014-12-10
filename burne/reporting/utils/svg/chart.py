@@ -10,6 +10,26 @@ WIDTH_ = 0
 HEIGHT_ = 1
 
 
+# return the axle title point, axle title transform
+def get_axle_title_style(axle_position, axle_start_p, axle_end_p):
+    axle_title_styles = [
+        {'offset': (0, -25), 'rotate': '0'},
+        {'offset': (0, 30), 'rotate': '0'},
+        {'offset': (-30, 0), 'rotate': '270'},
+        {'offset': (30, 0), 'rotate': '90'},
+    ]
+    p1 = (axle_start_p, axle_end_p)
+    offset = axle_title_styles[axle_position]['offset']
+    rotate = axle_title_styles[axle_position]['rotate']
+    axle_middle_p = tuple(map(lambda y: sum(y) / float(len(y)), zip(*p1)))
+    p2 = (offset, axle_middle_p)
+    axle_title_p = tuple(map(sum, zip(*p2)))
+    axle_title_transform = 'rotate(' + rotate + ', ' + \
+                           ', '.join(map(str, axle_title_p)) + ')'
+    return axle_title_p, axle_title_transform
+
+
+# return the gradation point, gradation end point, gradation number point and gradation line point
 def get_gradation(axle_zero_point, gradation_pixel, axle_position, chart_size):
     gradation_offset = [
         {
@@ -48,9 +68,9 @@ def get_gradation(axle_zero_point, gradation_pixel, axle_position, chart_size):
     grd_lin_end_point = grd['gradation_line_end_point']
     return \
         point, \
-        (point[0] + grd_end_point[0], point[1] + grd_end_point[1]), \
-        (point[0] + num_ins_point[0], point[1] + num_ins_point[1]), \
-        (point[0] + grd_lin_end_point[0], point[1] + grd_lin_end_point[1])
+        tuple(map(sum, zip(*(point, grd_end_point)))), \
+        tuple(map(sum, zip(*(point, num_ins_point)))), \
+        tuple(map(sum, zip(*(point, grd_lin_end_point))))
 
 
 # return axle's start point, end point and length
@@ -78,34 +98,18 @@ def calculate_axle(axle_position, chart_size, chart_margin):
 
 class AxleStyle():
 
-    def __init__(self, color, position,
-                 line_style, text_style, show_line=True, show_number=True,
-                 show_gradation=True, show_gradation_line=False):
+    def __init__(self, color, position, line_style, text_style, title_style,
+                 show_line=True, show_number=True, show_gradation=True, show_title=True, show_gradation_line=False):
         self.color = color
         self.position = position
         self.line_style = line_style
         self.text_style = text_style
+        self.title_style = title_style
         self.show_line = show_line
         self.show_gradation = show_gradation
         self.show_gradation_line = show_gradation_line
         self.show_number = show_number
-
-
-class Gradation():
-
-    def __init__(self, point, axle_position, chart_size):
-        self.point = point
-        self.axle_position = axle_position
-        self.chart_size = chart_size
-
-    def get_gradation_end_point(self):
-        pass
-
-    def get_number_insert_point(self):
-        pass
-
-    def get_gradation_line_end_point(self):
-        pass
+        self.show_title = show_title
 
 
 class SVGChart():
@@ -138,14 +142,19 @@ class SVGChart():
 
         if axs.show_gradation or axs.show_number:
             for i in range(num_gradation + 1):
-                g, end, num, g_line = get_gradation(start_position, i * pix_gradation, axs.position, self.size)
-
+                grd_p, end_p, num_p, grd_line_p = get_gradation(
+                    start_position, i * pix_gradation, axs.position, self.size
+                )
                 if axs.show_gradation:
-                    axl_grp.add(dwg.line(start=g, end=end, stroke=axs.color, style=axs.line_style))
+                    axl_grp.add(dwg.line(start=grd_p, end=end_p, stroke=axs.color, style=axs.line_style))
                 if axs.show_number:
-                    axl_grp.add(dwg.text(0 + i * increment_gradation, insert=num, style=axs.text_style))
+                    axl_grp.add(dwg.text(0 + i * increment_gradation, insert=num_p, style=axs.text_style))
                 if axs.show_gradation_line:
-                    axl_grp.add(dwg.line(start=g, end=g_line, stroke=axs.color, style=axs.line_style))
+                    axl_grp.add(dwg.line(start=grd_p, end=grd_line_p, stroke=axs.color, style=axs.line_style))
+        if axs.show_title:
+            axl_title_p, axl_title_t = get_axle_title_style(axs.position, start_position, end_position)
+            axl_grp.add(dwg.text(title, insert=axl_title_p, stroke=axs.color,
+                                 transform=axl_title_t, style=axs.title_style))
         dwg.add(axl_grp)
 
     def draw_data(self, data):
