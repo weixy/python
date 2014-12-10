@@ -21,15 +21,36 @@ class LineChartTest(unittest.TestCase):
         dom.unlink()
 
     def test_line_chart_axle(self):
-        line_chart = LineChart('reporting/_target/test_line_chart_axle.svg', (800, 400), (30, 30, 50, 50))
+        line_chart = LineChart('reporting/_target/test_line_chart_axle.svg', (800, 400), (30, 40, 50, 50))
         line_chart.draw_background('rgb(242, 242, 242)')
         axle_style = chart.AxleStyle(
             'darkgray',
             chart.DOWN_,
             'stroke-dasharray: 1 2; stroke-width: 1;',
-            'font-size: 11px; text-anchor: middle;',
+            'font-family: Arial; kerning: 1; font-size: 11px; fill: darkgray; text-anchor: middle;',
         )
         line_chart.draw_axle('Time (sec)', 100, 10, axle_style)
+        axle_style = chart.AxleStyle(
+            'darkgray',
+            chart.LEFT_,
+            'stroke-dasharray: 1 2; stroke-width: 1;',
+            'font-family: Arial; kerning: 1; font-size: 11px; fill: darkgray; text-anchor: middle;',
+        )
+        line_chart.draw_axle('Current Threads', 50, 5, axle_style)
+        axle_style = chart.AxleStyle(
+            'darkgray',
+            chart.UP_,
+            'stroke-dasharray: 1 2; stroke-width: 1;',
+            'font-family: Arial; kerning: 1; font-size: 11px; fill: darkgray; text-anchor: middle;',
+        )
+        line_chart.draw_axle('Current Users', 20, 5, axle_style)
+        axle_style = chart.AxleStyle(
+            'darkgray',
+            chart.RIGHT_,
+            'stroke-dasharray: 1 2; stroke-width: 1;',
+            'font-family: Arial; kerning: 1; font-size: 11px; fill: darkgray; text-anchor: middle;',
+        )
+        line_chart.draw_axle('Current Threads', 70, 10, axle_style)
         line_chart.save()
 
 if __name__ == '__main__':
