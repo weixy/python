@@ -1,12 +1,9 @@
 #!/usr/bin/env python
 __author__ = 'j1mw3i'
-from chart import SVGChart
+import chart
 
 
-class LineChart(SVGChart):
-
-    def draw_axle(self, max_value, style):
-        pass
+class LineChart(chart.SVGChart):
 
     def draw_data(self, data):
         pass
