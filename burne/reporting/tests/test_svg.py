@@ -11,7 +11,7 @@ class LineChartTest(unittest.TestCase):
 
     def test_line_chart_background(self):
         line_chart = LineChart('reporting/_target/test_line_chart.svg', (1000, 400))
-        line_chart.draw_background('rgb(242, 242, 242)')
+        line_chart.add_background('rgb(242, 242, 242)')
         line_chart.save()
         dom = minidom.parse(line_chart.filename)
         root = dom.documentElement
@@ -22,15 +22,16 @@ class LineChartTest(unittest.TestCase):
 
     def test_line_chart_axle(self):
         line_chart = LineChart('reporting/_target/test_line_chart_axle.svg', (800, 400), (40, 40, 50, 50))
-        line_chart.draw_background('rgb(242, 242, 242)')
+        line_chart.add_background('rgb(242, 242, 242)')
         axle_style = chart.AxleStyle(
             'darkgray',
-            chart.DOWN_,
+            chart.BOTTOM_,
             'stroke-dasharray: 1 2; stroke-width: 1;',
             'font-family: Arial; kerning: 1; font-size: 11px; fill: darkgray; text-anchor: middle;',
             'font-family: Arial; kerning: 1; font-size: 11px; fill: darkgray; stroke: none; text-anchor: middle;',
+            show_gradation_line=True,
         )
-        line_chart.draw_axle('Time (sec)', 100, 10, axle_style)
+        line_chart.add_axle('Time (sec)', 100, 10, axle_style)
         axle_style = chart.AxleStyle(
             'darkgray',
             chart.LEFT_,
@@ -38,15 +39,15 @@ class LineChartTest(unittest.TestCase):
             'font-family: Arial; kerning: 1; font-size: 11px; fill: darkgray; text-anchor: middle;',
             'font-family: Arial; kerning: 1; font-size: 11px; fill: darkgray; stroke: none; text-anchor: middle;',
         )
-        line_chart.draw_axle('Current Threads', 50, 5, axle_style)
+        line_chart.add_axle('Current Threads', 50, 5, axle_style)
         axle_style = chart.AxleStyle(
             'darkgray',
-            chart.UP_,
+            chart.TOP_,
             'stroke-dasharray: 1 2; stroke-width: 1;',
             'font-family: Arial; kerning: 1; font-size: 11px; fill: darkgray; text-anchor: middle;',
             'font-family: Arial; kerning: 1; font-size: 11px; fill: darkgray; stroke: none; text-anchor: middle;',
         )
-        line_chart.draw_axle('Current Users', 20, 5, axle_style)
+        line_chart.add_axle('Current Users', 20, 5, axle_style)
         axle_style = chart.AxleStyle(
             'darkgray',
             chart.RIGHT_,
@@ -54,7 +55,7 @@ class LineChartTest(unittest.TestCase):
             'font-family: Arial; kerning: 1; font-size: 11px; fill: darkgray; text-anchor: middle;',
             'font-family: Arial; kerning: 1; font-size: 11px; fill: darkgray; stroke: none; text-anchor: middle;',
         )
-        line_chart.draw_axle('Response Time (ms)', 70, 10, axle_style)
+        line_chart.add_axle('Response Time (ms)', 70, 10, axle_style)
         line_chart.save()
         dom = minidom.parse(line_chart.filename)
         root = dom.documentElement
@@ -73,4 +74,4 @@ class LineChartTest(unittest.TestCase):
         dom.unlink()
 
 if __name__ == '__main__':
-    unittest.main(warnings='ignore')
+    unittest.main()

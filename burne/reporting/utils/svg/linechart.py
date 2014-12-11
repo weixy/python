@@ -5,5 +5,5 @@ import chart
 
 class LineChart(chart.SVGChart):
 
-    def draw_data(self, data):
+    def add_data(self, data):
         pass
