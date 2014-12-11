@@ -97,6 +97,7 @@ class LineChartTest(unittest.TestCase):
             'stroke-dasharray: 1 2; stroke-width: 1;',
             'font-family: Arial; kerning: 1; font-size: 11px; fill: darkgray; text-anchor: middle;',
             'font-family: Arial; kerning: 1; font-size: 11px; fill: rgb(0, 147, 255); stroke: none; text-anchor: middle;',
+            show_line=False,
         )
         line_chart.add_axle('Current Threads', 35, 5, axle_style)
         line_chart.add_data(plots[3], 'rgb(0, 147, 255)', 110, 35)
@@ -107,6 +108,7 @@ class LineChartTest(unittest.TestCase):
             'stroke-dasharray: 1 2; stroke-width: 1;',
             'font-family: Arial; kerning: 1; font-size: 11px; fill: darkgray; text-anchor: middle;',
             'font-family: Arial; kerning: 1; font-size: 11px; fill: rgb(78, 165, 41); stroke: none; text-anchor: middle;',
+            show_line=False,
         )
         line_chart.add_axle('Average Response Time (ms)', 40, 5, axle_style)
         line_chart.add_data(plots[0], 'rgb(78, 165, 41)', 110, 40)

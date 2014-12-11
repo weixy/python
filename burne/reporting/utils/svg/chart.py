@@ -120,7 +120,7 @@ class Axle():
                     axl_grp.add(dwg.line(start=grd_p, end=end_p, stroke=axs.color, style=axs.line_style))
                 if axs.show_number:
                     axl_grp.add(dwg.text(0 + i * gradation_increment, insert=num_p, style=axs.text_style))
-                if axs.show_gradation_line:
+                if axs.show_gradation_line and i != 0 and i != num_gradation:
                     axl_grp.add(dwg.line(start=grd_p, end=grd_line_p, stroke=axs.color, style=axs.line_style))
         if axs.show_title:
             axl_title_p, axl_title_t = self.get_axle_title_transform()
