@@ -5,6 +5,8 @@ import unittest
 from xml.dom import minidom
 from ..utils.svg.linechart import LineChart
 from ..utils.svg import chart
+from ..utils.data import data
+from ..tests import test_data
 
 
 class LineChartTest(unittest.TestCase):
@@ -72,6 +74,45 @@ class LineChartTest(unittest.TestCase):
         descs = groups[4].getElementsByTagName('desc')
         self.assertTrue(descs[0].firstChild.nodeValue == 'Response Time (ms)')
         dom.unlink()
+
+    def test_line_chart_data(self):
+        raw_data = test_data.extract_csv('reporting/samples/sample_data.csv')
+        data_dict = test_data.SAMPLE_DATA_INDEX
+        chart_data = data.ChartData(data_dict, raw_data)
+        plots = chart_data.get_plots()
+        line_chart = LineChart('reporting/_target/test_line_chart_data.svg', (800, 300), (40, 40, 50, 50))
+        line_chart.add_background('rgb(242, 242, 242)')
+        axle_style = chart.AxleStyle(
+            'darkgray',
+            chart.BOTTOM_,
+            'stroke-dasharray: 1 2; stroke-width: 1;',
+            'font-family: Arial; kerning: 1; font-size: 11px; fill: darkgray; text-anchor: middle;',
+            'font-family: Arial; kerning: 1; font-size: 11px; fill: darkgray; stroke: none; text-anchor: middle;',
+            show_gradation_line=True,
+        )
+        line_chart.add_axle('Time (sec)', 110, 10, axle_style)
+        axle_style = chart.AxleStyle(
+            'darkgray',
+            chart.LEFT_,
+            'stroke-dasharray: 1 2; stroke-width: 1;',
+            'font-family: Arial; kerning: 1; font-size: 11px; fill: darkgray; text-anchor: middle;',
+            'font-family: Arial; kerning: 1; font-size: 11px; fill: rgb(0, 147, 255); stroke: none; text-anchor: middle;',
+        )
+        line_chart.add_axle('Current Threads', 35, 5, axle_style)
+        line_chart.add_data(plots[3], 'rgb(0, 147, 255)', 110, 35)
+
+        axle_style = chart.AxleStyle(
+            'darkgray',
+            chart.RIGHT_,
+            'stroke-dasharray: 1 2; stroke-width: 1;',
+            'font-family: Arial; kerning: 1; font-size: 11px; fill: darkgray; text-anchor: middle;',
+            'font-family: Arial; kerning: 1; font-size: 11px; fill: rgb(78, 165, 41); stroke: none; text-anchor: middle;',
+        )
+        line_chart.add_axle('Average Response Time (ms)', 40, 5, axle_style)
+        line_chart.add_data(plots[0], 'rgb(78, 165, 41)', 110, 40)
+
+        line_chart.save()
+
 
 if __name__ == '__main__':
     unittest.main()

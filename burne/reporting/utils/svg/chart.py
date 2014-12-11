@@ -177,7 +177,7 @@ class SVGChart():
         axl_grp = axle.draw(dwg, max_gradation, increment_gradation, self.data_view)
         dwg.add(axl_grp)
 
-    def add_data(self, data):
+    def add_data(self, data, color, axle_x, axle_y):
         raise NotImplementedError("Please Implement this method")
 
     def save(self):
