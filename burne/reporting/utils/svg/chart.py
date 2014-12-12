@@ -76,13 +76,13 @@ class Axle():
             },
             {
                 'gradation_point': (0, -1),
-                'gradation_end_point': (7, 0),
+                'gradation_end_point': (5, 0),
                 'number_insert_point': (-15, 0),
                 'gradation_line_end_point': (data_view.width, 0),
             },
             {
                 'gradation_point': (0, -1),
-                'gradation_end_point': (-7, 0),
+                'gradation_end_point': (-5, 0),
                 'number_insert_point': (15, 0),
                 'gradation_line_end_point': (-1 * data_view.width, 0),
             },
