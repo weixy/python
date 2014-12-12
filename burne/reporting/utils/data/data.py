@@ -27,5 +27,5 @@ class ChartData():
         id_list = [d[0] for d in self.raw_data]
         for i in range(1, len(data)):
             value_list = [d[i] for d in self.raw_data]
-            plots.append(SeriesData(self.index_list[i], zip(id_list, value_list)))
+            plots.append(SeriesData(self.index_list[i], value_list))
         return plots

@@ -2,6 +2,7 @@
 __author__ = 'j1mw3i'
 
 import unittest
+
 from xml.dom import minidom
 from ..utils.svg.linechart import LineChart
 from ..utils.svg import chart
@@ -80,14 +81,14 @@ class LineChartTest(unittest.TestCase):
         data_dict = test_data.SAMPLE_DATA_INDEX
         chart_data = data.ChartData(data_dict, raw_data)
         plots = chart_data.get_plots()
-        line_chart = LineChart('reporting/_target/test_line_chart_data.svg', (800, 300), (40, 40, 50, 50))
-        line_chart.add_background('rgb(242, 242, 242)')
+        line_chart = LineChart('reporting/_target/test_line_chart_data.svg', (600, 200), (40, 40, 50, 50))
+        line_chart.add_background('#F2F2F2')
         axle_style = chart.AxleStyle(
             'darkgray',
             chart.BOTTOM_,
             'stroke-dasharray: 1 2; stroke-width: 1;',
-            'font-family: Arial; kerning: 1; font-size: 11px; fill: darkgray; text-anchor: middle;',
-            'font-family: Arial; kerning: 1; font-size: 11px; fill: darkgray; stroke: none; text-anchor: middle;',
+            'font-family: Arial; font-size: 11px; fill: darkgray; text-anchor: middle;',
+            'font-family: Arial; font-size: 11px; fill: darkgray; stroke: none; text-anchor: middle;',
             show_gradation_line=True,
         )
         line_chart.add_axle('Time (sec)', 110, 10, axle_style)
@@ -95,23 +96,24 @@ class LineChartTest(unittest.TestCase):
             'darkgray',
             chart.LEFT_,
             'stroke-dasharray: 1 2; stroke-width: 1;',
-            'font-family: Arial; kerning: 1; font-size: 11px; fill: darkgray; text-anchor: middle;',
-            'font-family: Arial; kerning: 1; font-size: 11px; fill: rgb(0, 147, 255); stroke: none; text-anchor: middle;',
+            'font-family: Arial; font-size: 11px; fill: darkgray; text-anchor: middle;',
+            'font-family: Arial; font-size: 11px; fill: #01B9E4; stroke: none; text-anchor: middle;',
             show_line=False,
         )
         line_chart.add_axle('Current Threads', 35, 5, axle_style)
-        line_chart.add_data(plots[3], 'rgb(0, 147, 255)', 110, 35)
 
         axle_style = chart.AxleStyle(
             'darkgray',
             chart.RIGHT_,
             'stroke-dasharray: 1 2; stroke-width: 1;',
-            'font-family: Arial; kerning: 1; font-size: 11px; fill: darkgray; text-anchor: middle;',
-            'font-family: Arial; kerning: 1; font-size: 11px; fill: rgb(78, 165, 41); stroke: none; text-anchor: middle;',
+            'font-family: Arial; font-size: 11px; fill: darkgray; text-anchor: middle;',
+            'font-family: Arial; font-size: 11px; fill: #669900; stroke: none; text-anchor: middle;',
             show_line=False,
         )
         line_chart.add_axle('Average Response Time (ms)', 40, 5, axle_style)
-        line_chart.add_data(plots[0], 'rgb(78, 165, 41)', 110, 40)
+
+        line_chart.add_data(plots[3], '#01B9E4', 110, 35)
+        line_chart.add_data(plots[0], '#669900', 110, 40)
 
         line_chart.save()
 
