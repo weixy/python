@@ -82,7 +82,7 @@ class LineChartTest(unittest.TestCase):
         chart_data = data.ChartData(data_dict, raw_data)
         plots = chart_data.get_plots()
         line_chart = LineChart('reporting/_target/test_line_chart_data.svg', (600, 200), (40, 40, 50, 50))
-        line_chart.add_background('#F2F2F2')
+        line_chart.add_background('#F9FBFB')
         axle_style = chart.AxleStyle(
             'darkgray',
             chart.BOTTOM_,
@@ -91,13 +91,13 @@ class LineChartTest(unittest.TestCase):
             'font-family: Arial; font-size: 11px; fill: darkgray; stroke: none; text-anchor: middle;',
             show_gradation_line=True,
         )
-        line_chart.add_axle('Time (sec)', 110, 10, axle_style)
+        axle1 = line_chart.add_axle('Time (sec)', 110, 10, axle_style)
         axle_style = chart.AxleStyle(
             'darkgray',
             chart.LEFT_,
             'stroke-dasharray: 1 2; stroke-width: 1;',
             'font-family: Arial; font-size: 11px; fill: darkgray; text-anchor: middle;',
-            'font-family: Arial; font-size: 11px; fill: #01B9E4; stroke: none; text-anchor: middle;',
+            'font-family: Arial; font-size: 11px; fill: #5dc4cd; stroke: none; text-anchor: middle;',
             show_line=False,
         )
         line_chart.add_axle('Current Threads', 35, 5, axle_style)
@@ -112,9 +112,9 @@ class LineChartTest(unittest.TestCase):
         )
         line_chart.add_axle('Average Response Time (ms)', 40, 5, axle_style)
 
-        line_chart.add_data(plots[3], '#01B9E4', 110, 35)
+        line_chart.add_data(plots[3], '#5dc4cd', 110, 35)
         line_chart.add_data(plots[0], '#669900', 110, 40)
-
+        line_chart.add_data_trigger(axle1)
         line_chart.save()
 
 

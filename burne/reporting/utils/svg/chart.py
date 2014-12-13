@@ -12,11 +12,13 @@ HEIGHT_ = 1
 
 class Axle():
 
-    def __init__(self, axle_title, axle_style):
+    def __init__(self, axle_title, axle_style, gradation_max, gradation_increment):
         self.title = axle_title
         self.style = axle_style
         self.start_point = (0, 0)
         self.end_point = (0, 0)
+        self.gradation_max = gradation_max
+        self.gradation_increment = gradation_increment
 
     # return axle's start point, end point and length
     def calculate_axle(self, data_view):
@@ -102,12 +104,12 @@ class Axle():
             tuple(map(sum, zip(*(point, num_ins_point)))), \
             tuple(map(sum, zip(*(point, grd_lin_end_point))))
 
-    def draw(self, dwg, gradation_max, gradation_increment, data_view):
+    def draw(self, dwg, data_view):
         self.start_point, self.end_point, length = self.calculate_axle(data_view)
         axs = self.style
         axl_grp = dwg.g(class_='axle')
         axl_grp.set_desc(desc=self.title)
-        num_gradation = gradation_max / gradation_increment
+        num_gradation = self.gradation_max / self.gradation_increment
         pix_gradation = float(length) / num_gradation
         if axs.show_line:
             axl_grp.add(dwg.line(start=self.start_point, end=self.end_point,
@@ -119,7 +121,7 @@ class Axle():
                 if axs.show_gradation:
                     axl_grp.add(dwg.line(start=grd_p, end=end_p, stroke=axs.color, style=axs.line_style))
                 if axs.show_number:
-                    axl_grp.add(dwg.text(0 + i * gradation_increment, insert=num_p, style=axs.text_style))
+                    axl_grp.add(dwg.text(0 + i * self.gradation_increment, insert=num_p, style=axs.text_style))
                 if axs.show_gradation_line and i != 0 and i != num_gradation:
                     axl_grp.add(dwg.line(start=grd_p, end=grd_line_p, stroke=axs.color, style=axs.line_style))
         if axs.show_title:
@@ -158,7 +160,8 @@ class DataViewRect():
 class SVGChart():
 
     def __init__(self, filename, size, margin=(0, 0, 0, 0), profile='full'):
-        self.dwg = svgwrite.Drawing(filename, profile=profile, size=size)
+        self.dwg = svgwrite.Drawing(filename, profile=profile, size=size, class_='line_chart')
+        self.dwg.set_desc(title='Chart')
         self.size = size
         self.filename = filename
         self.margin = margin
@@ -173,9 +176,10 @@ class SVGChart():
 
     def add_axle(self, title, max_gradation, increment_gradation, axle_style):
         dwg = self.dwg
-        axle = Axle(title, axle_style)
-        axl_grp = axle.draw(dwg, max_gradation, increment_gradation, self.data_view)
+        axle = Axle(title, axle_style, max_gradation, increment_gradation)
+        axl_grp = axle.draw(dwg, self.data_view)
         dwg.add(axl_grp)
+        return axle
 
     def add_data(self, data, color, axle_x, axle_y):
         raise NotImplementedError("Please Implement this method")

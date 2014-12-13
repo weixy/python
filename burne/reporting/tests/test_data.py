@@ -16,10 +16,10 @@ def extract_csv(file_name):
     return lines
 
 SAMPLE_DATA_INDEX = ['id',
-                     'average_resp_time',
-                     'minimum_resp_time',
-                     'maximum_resp_time',
-                     'current_threads',
+                     'Average Response Time',
+                     'Minimum Response Time',
+                     'Maximum Response Time',
+                     'Current Threads',
                      ]
 
 
@@ -37,7 +37,7 @@ class DataAnalystTest(unittest.TestCase):
         self.assertTrue(chart_data.is_index_data_matched())
         plots = chart_data.get_plots()
         self.assertTrue(len(plots) == 4)
-        self.assertTrue(plots[0].title == 'average_resp_time')
+        self.assertTrue(plots[0].title == 'Average Response Time')
         self.assertTrue(len(plots[0].data) == len(chart_data.raw_data))
 
 
