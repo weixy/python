@@ -6,6 +6,7 @@
     <style>
         #tooltip {
             position: absolute;
+            border-radius: 3px;
             background: rgba(53, 64, 81, 0.8);
             color: white;
             font-family: Arial;
@@ -31,7 +32,7 @@
                 $('.data_trigger').mouseenter(function(evt) {
                     var idx = $(evt.currentTarget).find('desc').text()
                     $('#mouse_x').text(idx);
-                    var datas = [];
+                    var data_sets = [];
                     $('circle.data_cycle').each(function() {
                         var c_idx = $(this).attr('id');
                         if (c_idx == idx) {
@@ -41,16 +42,11 @@
                             data = {}
                             data.type = type;
                             data.value = value;
-                            datas.push(data);
-                            if (type == "Current Threads") {
-                                $('#mouse_y').text(value);
-                            } else {
-                                $('#mouse_z').text(value);
-                            }
+                            data_sets.push(data);
                         }
                     });
                     var position = $(evt.currentTarget).offset();
-                    showTooltip(position, datas);
+                    showTooltip(position, data_sets);
                 });
                 $('.data_trigger').mouseleave(function(evt) {
                     var idx = $(evt.currentTarget).find('desc').text()
@@ -64,11 +60,11 @@
                 });
             });
         });
-        function showTooltip(position, datas) {
+        function showTooltip(position, data_sets) {
             tooltip = $('#tooltip');
-            if (datas.length > 0) {
-                for (var i=0; i<datas.length; i++) {
-                    tooltip.append("<span class='data_type'>" + datas[i].type + ":</span><span class=’data_value'>" + datas[i].value + "</span><br/>");
+            if (data_sets.length > 0) {
+                for (var i=0; i<data_sets.length; i++) {
+                    tooltip.append("<span class='data_type'>" + data_sets[i].type + ":</span><span class=’data_value'>" + data_sets[i].value + "</span><br/>");
                 }
                 tooltip.css({top: position.top, left: position.left + 40, position:'absolute', display: 'block'});
             }
