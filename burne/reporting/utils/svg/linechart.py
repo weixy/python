@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 __author__ = 'j1mw3i'
 import chart
-
+import re
 
 class LineChart(chart.SVGChart):
 
@@ -27,13 +27,14 @@ class LineChart(chart.SVGChart):
         #         path_d += 'C' + str(points[i][0]) + ',' + str(points[i][1]) + ' '
         #     else:
         #         path_d += str(points[i][0]) + ',' + str(points[i][1]) + ' '
-        line_g = dwg.linearGradient(id=series.title.replace(' ', ''), x1='0%', y1='0%', x2='0%', y2='100%')
+        id_name = re.sub(r'[^a-zA-Z0-9]', '', series.title)
+        line_g = dwg.linearGradient(id=id_name, x1='0%', y1='0%', x2='0%', y2='100%')
         line_g.add_stop_color(offset='0%', color=color, opacity='0.4')
         line_g.add_stop_color(offset='100%', color='#F9FBFB', opacity='0.15')
         dwg.defs.add(line_g)
 
         grp_data.add(dwg.path(d=path_d, stroke=color, fill='none', style='stroke-width:1.1'))
-        grp_data.add(dwg.path(d=path_d + 'Z', fill='url(#'+series.title.replace(' ', '')+')'))
+        grp_data.add(dwg.path(d=path_d + 'Z', fill='url(#'+id_name+')'))
 
         for i in range(len(points)):
             circle = dwg.circle(class_='data_cycle', center=points[i], r=3, id=i,
