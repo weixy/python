@@ -37,9 +37,9 @@ class LineChart(chart.SVGChart):
         grp_data.add(dwg.path(d=path_d + 'Z', fill='url(#'+id_name+')'))
 
         for i in range(len(points)):
-            circle = dwg.circle(class_='data_cycle', center=points[i], r=3, id=i,
-                                fill='white', stroke='#ff6600',
-                                style='display: none; stroke-width: 2;')
+            circle = dwg.circle(class_='data_cycle', center=points[i], r=4, id=i,
+                                fill='white', stroke=color,
+                                style='display: none; stroke-width: 1.5;')
             circle.set_desc(title=series.title, desc=data[i])
             grp_data.add(circle)
         dwg.add(grp_data)

@@ -35,7 +35,7 @@
                     $('circle.data_cycle').each(function() {
                         var c_idx = $(this).attr('id');
                         if (c_idx == idx) {
-                            $(this).attr('style', 'stroke-width:2;');
+                            $(this).attr('style', 'stroke-width:1.5;');
                             var type = $(this).find('title').text();
                             var value = $(this).find('desc').text();
                             data = {}
@@ -57,7 +57,7 @@
                     $('circle.data_cycle').each(function() {
                         var c_idx = $(this).attr('id');
                         if (c_idx == idx) {
-                            $(this).attr('style', 'display:none;stroke-width:2;');
+                            $(this).attr('style', 'display:none;stroke-width:1;');
                         }
                     });
                     hideTooltip();

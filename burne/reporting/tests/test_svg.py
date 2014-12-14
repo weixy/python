@@ -107,13 +107,14 @@ class LineChartTest(unittest.TestCase):
             chart.RIGHT_,
             'stroke-dasharray: 1 2; stroke-width: 1;',
             'font-family: Arial; font-size: 11px; fill: darkgray; text-anchor: middle;',
-            'font-family: Arial; font-size: 11px; fill: #669900; stroke: none; text-anchor: middle;',
+            'font-family: Arial; font-size: 11px; fill: darkgray; stroke: none; text-anchor: middle;',
             show_line=False,
         )
-        line_chart.add_axle('Average Response Time (sec)', 40, 5, axle_style)
+        line_chart.add_axle('Response Time (sec)', 55, 5, axle_style)
 
         line_chart.add_data(plots[3], '#05AADB', 110, 35)
-        line_chart.add_data(plots[0], '#669900', 110, 40)
+        line_chart.add_data(plots[2], '#ea4c88', 110, 55)
+        line_chart.add_data(plots[0], '#669900', 110, 55)
         line_chart.add_data_trigger(axle1)
         line_chart.save()
 
