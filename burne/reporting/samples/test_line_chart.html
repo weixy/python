@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        #tooltip {
+            position: absolute;
+            background: rgba(53, 64, 81, 0.8);
+            color: white;
+            font-family: Arial;
+            font-size: 10px;
+            padding: 5px 5px 5px 5px;
+            width: 100px;
+            display: none;
+        }
+        .data_type {
+            color: #2AB0F7;
+            float: left;
+            width: 100%;
+        }
+        .data_value {
+            font-weight: bold;
+            float: left;
+        }
+    </style>
+    <script src="js/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            jQuery('#svg-main').load('../_target/test_line_chart_data.svg', null, function(){
+                $('.data_trigger').mouseenter(function(evt) {
+                    var idx = $(evt.currentTarget).find('desc').text()
+                    $('#mouse_x').text(idx);
+                    var datas = [];
+                    $('circle.data_cycle').each(function() {
+                        var c_idx = $(this).attr('id');
+                        if (c_idx == idx) {
+                            $(this).attr('style', 'stroke-width:2;');
+                            var type = $(this).find('title').text();
+                            var value = $(this).find('desc').text();
+                            data = {}
+                            data.type = type;
+                            data.value = value;
+                            datas.push(data);
+                            if (type == "Current Threads") {
+                                $('#mouse_y').text(value);
+                            } else {
+                                $('#mouse_z').text(value);
+                            }
+                        }
+                    });
+                    var position = $(evt.currentTarget).offset();
+                    showTooltip(position, datas);
+                });
+                $('.data_trigger').mouseleave(function(evt) {
+                    var idx = $(evt.currentTarget).find('desc').text()
+                    $('circle.data_cycle').each(function() {
+                        var c_idx = $(this).attr('id');
+                        if (c_idx == idx) {
+                            $(this).attr('style', 'display:none;stroke-width:2;');
+                        }
+                    });
+                    hideTooltip();
+                });
+            });
+        });
+        function showTooltip(position, datas) {
+            tooltip = $('#tooltip');
+            if (datas.length > 0) {
+                for (var i=0; i<datas.length; i++) {
+                    tooltip.append("<span class='data_type'>" + datas[i].type + ":</span><span class=’data_value'>" + datas[i].value + "</span><br/>");
+                }
+                tooltip.css({top: position.top, left: position.left + 40, position:'absolute', display: 'block'});
+            }
+        }
+        function hideTooltip() {
+            tooltip = $('#tooltip');
+            tooltip.css({display: 'none'});
+            tooltip.empty();
+        }
+    </script>
+</head>
+<body>
+    <div id="svg-main" style="margin-top: 100px; margin-left: 80px;"></div>
+    <div id="tooltip">
+    </div>
+    <br/><span id="mouse_x">0</span>[<span id="mouse_y"></span>-<span id="mouse_z"></span>]
+</body>
+</html>
