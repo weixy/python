@@ -1,3 +1,5 @@
 from django.contrib import admin
+from models import Scenario, LoadRequest
 
-# Register your models here.
+admin.site.register(Scenario)
+admin.site.register(LoadRequest)
